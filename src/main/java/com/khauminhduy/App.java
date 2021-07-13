@@ -44,9 +44,8 @@ public class App {
 			};
 			
 			
-			
 			Integer numWorkers = 0;
-			int numJob = jobs.size();
+			int numTasks = jobs.size();
 			
 			if(max.isPresent()) {
 				numWorkers = max.get();
@@ -61,9 +60,9 @@ public class App {
 				return;
 			}
 			
-			MPVariable[][] variables = new MPVariable[numWorkers][numJob];
+			MPVariable[][] variables = new MPVariable[numWorkers][numTasks];
 			for(int i = 0; i < numWorkers; i++) {
-				for (int j = 0; j < numJob; j++) {
+				for (int j = 0; j < numTasks; j++) {
 					if(listWorkers2[j] >= numWorkers) {
 						variables[i][j] = solver.makeIntVar(1, 1, "");
 					} else {
@@ -75,13 +74,13 @@ public class App {
 			
 			for(int i = 0; i < numWorkers; i++) {
 				MPConstraint constraint = solver.makeConstraint(0, 60, "");
-				for(int j = 0; j < numJob; j++) {
+				for(int j = 0; j < numTasks; j++) {
 					int time = times.get(j) > 60 ? times.get(j) / numWorkers : times.get(j);
 					constraint.setCoefficient(variables[i][j], time);
 				}
 			}
 			
-			for(int j = 0; j < numJob; j++) {
+			for(int j = 0; j < numTasks; j++) {
 				int bound = listWorker.get(j) >= numWorkers ? numWorkers : listWorker.get(j);
 				MPConstraint constraint = solver.makeConstraint(listWorkers2[j], listWorkers2[j], "");
 				for(int i = 0; i < numWorkers; i++) {
@@ -92,7 +91,7 @@ public class App {
 			
 			MPObjective objective = solver.objective();
 			for(int i = 0; i < numWorkers; i++) {
-				for(int j = 0; j < numJob; j++) {
+				for(int j = 0; j < numTasks; j++) {
 					int time = times.get(j) > 60 ? times.get(j) / numWorkers : times.get(j);
 					objective.setCoefficient(variables[i][j], time);
 				}
@@ -105,7 +104,7 @@ public class App {
 				System.out.println("Cost: " + objective.value());
 				for(int i = 0; i < numWorkers; i++) {
 					int s = 0;
-					for(int j = 0; j < numJob; j++) {
+					for(int j = 0; j < numTasks; j++) {
 						if(variables[i][j].solutionValue() > 0.5) {
 							int time = times.get(j) > 60 ? times.get(j) / numWorkers : times.get(j);
 							s += time;
