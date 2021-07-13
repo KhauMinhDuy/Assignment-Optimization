@@ -35,5 +35,13 @@ class TestReadFileExcel {
 			e.printStackTrace();
 		}
 	}
+	
+	@Test
+	void testParseInt() {
+		float parseInt = Float.parseFloat("3.0");
+		int x = (int) parseInt;
+		assertEquals(3.0, parseInt);
+		assertEquals(3, x);
+	}
 
 }

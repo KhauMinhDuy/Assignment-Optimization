@@ -4,17 +4,17 @@ public class Data {
 
 	private String date;
 	private String shopId;
-	private String shiftBig;
-	private String shiftSmall;
+	private Integer shiftBig;
+	private Integer shiftSmall;
 	private String shiftName;
-	private String headCount;
-	private String timeShiftSmall;
-	private String timeShiftBig;
+	private Integer headCount;
+	private Integer timeShiftSmall;
+	private Integer timeShiftBig;
 	private String jobName;
-	private String typeWork;
-	private String propertiesWork;
-	private String listWorkers;
-	private String minutesFinishWork;
+	private Integer typeWork;
+	private Integer propertiesWork;
+	private Integer listWorkers;
+	private Integer minutesFinishWork;
 	private String hourStart;
 	private String minuteStart;
 	private String hourEnd;
@@ -36,19 +36,19 @@ public class Data {
 		this.shopId = shopId;
 	}
 
-	public String getShiftBig() {
+	public Integer getShiftBig() {
 		return shiftBig;
 	}
 
-	public void setShiftBig(String shiftBig) {
+	public void setShiftBig(Integer shiftBig) {
 		this.shiftBig = shiftBig;
 	}
 
-	public String getShiftSmall() {
+	public Integer getShiftSmall() {
 		return shiftSmall;
 	}
 
-	public void setShiftSmall(String shiftSmall) {
+	public void setShiftSmall(Integer shiftSmall) {
 		this.shiftSmall = shiftSmall;
 	}
 
@@ -60,27 +60,27 @@ public class Data {
 		this.shiftName = shiftName;
 	}
 
-	public String getHeadCount() {
+	public Integer getHeadCount() {
 		return headCount;
 	}
 
-	public void setHeadCount(String headCount) {
+	public void setHeadCount(Integer headCount) {
 		this.headCount = headCount;
 	}
 
-	public String getTimeShiftSmall() {
+	public Integer getTimeShiftSmall() {
 		return timeShiftSmall;
 	}
 
-	public void setTimeShiftSmall(String timeShiftSmall) {
+	public void setTimeShiftSmall(Integer timeShiftSmall) {
 		this.timeShiftSmall = timeShiftSmall;
 	}
 
-	public String getTimeShiftBig() {
+	public Integer getTimeShiftBig() {
 		return timeShiftBig;
 	}
 
-	public void setTimeShiftBig(String timeShiftBig) {
+	public void setTimeShiftBig(Integer timeShiftBig) {
 		this.timeShiftBig = timeShiftBig;
 	}
 
@@ -92,79 +92,93 @@ public class Data {
 		this.jobName = jobName;
 	}
 
-	public String getLoaiCV() {
+	public Integer getLoaiCV() {
 		return typeWork;
 	}
 
-	public void setLoaiCV(String loaiCV) {
+	public void setLoaiCV(Integer loaiCV) {
 		this.typeWork = loaiCV;
 	}
 
-	public String getTcCV() {
+	public Integer getTcCV() {
 		return propertiesWork;
 	}
 
-	public void setTcCV(String tcCV) {
+	public void setTcCV(Integer tcCV) {
 		this.propertiesWork = tcCV;
 	}
 
-	public String getSoNguoiLam() {
+	public Integer getTypeWork() {
+		return typeWork;
+	}
+
+	public void setTypeWork(Integer typeWork) {
+		this.typeWork = typeWork;
+	}
+
+	public Integer getPropertiesWork() {
+		return propertiesWork;
+	}
+
+	public void setPropertiesWork(Integer propertiesWork) {
+		this.propertiesWork = propertiesWork;
+	}
+
+	public Integer getListWorkers() {
 		return listWorkers;
 	}
 
-	public void setSoNguoiLam(String soNguoiLam) {
-		this.listWorkers = soNguoiLam;
+	public void setListWorkers(Integer listWorkers) {
+		this.listWorkers = listWorkers;
 	}
 
-	public String getSoPhutHoanThanh() {
+	public Integer getMinutesFinishWork() {
 		return minutesFinishWork;
 	}
 
-	public void setSoPhutHoanThanh(String soPhutHoanThanh) {
-		this.minutesFinishWork = soPhutHoanThanh;
+	public void setMinutesFinishWork(Integer minutesFinishWork) {
+		this.minutesFinishWork = minutesFinishWork;
 	}
 
-	public String getGioBD() {
+	public String getHourStart() {
 		return hourStart;
 	}
 
-	public void setGioBD(String gioBD) {
-		this.hourStart = gioBD;
+	public void setHourStart(String hourStart) {
+		this.hourStart = hourStart;
 	}
 
-	public String getPhutBD() {
+	public String getMinuteStart() {
 		return minuteStart;
 	}
 
-	public void setPhutBD(String phutBD) {
-		this.minuteStart = phutBD;
+	public void setMinuteStart(String minuteStart) {
+		this.minuteStart = minuteStart;
 	}
 
-	public String getGioKT() {
+	public String getHourEnd() {
 		return hourEnd;
 	}
 
-	public void setGioKT(String gioKT) {
-		this.hourEnd = gioKT;
+	public void setHourEnd(String hourEnd) {
+		this.hourEnd = hourEnd;
 	}
 
-	public String getPhutKT() {
+	public String getMinuteEnd() {
 		return minuteEnd;
 	}
 
-	public void setPhutKT(String phutKT) {
-		this.minuteEnd = phutKT;
+	public void setMinuteEnd(String minuteEnd) {
+		this.minuteEnd = minuteEnd;
 	}
 
 	@Override
 	public String toString() {
 		return "Data [date=" + date + ", shopId=" + shopId + ", shiftBig=" + shiftBig + ", shiftSmall=" + shiftSmall
 				+ ", shiftName=" + shiftName + ", headCount=" + headCount + ", timeShiftSmall=" + timeShiftSmall
-				+ ", timeShiftBig=" + timeShiftBig + ", jobName=" + jobName + ", loaiCV=" + typeWork + ", tcCV=" + propertiesWork
-				+ ", soNguoiLam=" + listWorkers + ", soPhutHoanThanh=" + minutesFinishWork + ", gioBD=" + hourStart
-				+ ", phutBD=" + minuteStart + ", gioKT=" + hourEnd + ", phutKT=" + minuteEnd + "]";
+				+ ", timeShiftBig=" + timeShiftBig + ", jobName=" + jobName + ", loaiCV=" + typeWork + ", tcCV="
+				+ propertiesWork + ", soNguoiLam=" + listWorkers + ", soPhutHoanThanh=" + minutesFinishWork + ", gioBD="
+				+ hourStart + ", phutBD=" + minuteStart + ", gioKT=" + hourEnd + ", phutKT=" + minuteEnd + "]";
 	}
-	
-	
 
 }
