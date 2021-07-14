@@ -56,4 +56,15 @@ public class CollectUtill {
 		 throw new IllegalArgumentException("khong tim thay thoi gian lam viec ca nho");
 	}
 	
+	public static Integer timeShiftBig(List<Data> list, String date, int shiftBig, int shiftSmall) {
+		 Optional<Integer> max = list.stream()
+				.filter(e -> e.getDate().equalsIgnoreCase(date))
+				.filter(e -> e.getShiftBig() == shiftBig)
+				.filter(e -> e.getShiftSmall() == shiftSmall)
+				.map(e -> e.getTimeShiftBig())
+				.max(Integer::compareTo);
+		 if(max.isPresent()) return max.get();
+		 throw new IllegalArgumentException("khong tim thay thoi gian lam viec ca lon");
+	}
+	
 }

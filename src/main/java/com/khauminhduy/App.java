@@ -16,13 +16,21 @@ import com.khauminhduy.util.ReadFileExcel;
 public class App {
 
 	public static void main(String[] args) {
-		
 		Loader.loadNativeLibraries();
-		
-		String date = "31-May-2021";
-		int shiftBig = 2;
-		int shiftSmall = 14;
-		
+		System.out.println("CA 1 - 11");
+		process("31-May-2021", 1, 11);
+		System.out.println("=====================================");
+		System.out.println("CA 1 - 12");
+		process("31-May-2021", 1, 12);
+		System.out.println("=====================================");
+		System.out.println("CA 1 - 13");
+		process("31-May-2021", 1, 13);
+		System.out.println("=====================================");
+		System.out.println("CA 2 - 14");
+		process("31-May-2021", 2, 14);
+	}
+
+	private static void process(String date, int shiftBig, int shiftSmall) {
 		String path = "src/main/resources/AssignmentData.xlsx";
 		
 		try {
@@ -37,11 +45,9 @@ public class App {
 			
 			List<Integer> listWorkers = CollectUtill.toListWorker(list, date, shiftBig, shiftSmall);
 			
-			Integer timeShiftSmall = CollectUtill.timeShiftSmall(list, date, shiftBig, shiftSmall);
+			Integer timeShiftBig = CollectUtill.timeShiftBig(list, date, shiftBig, shiftSmall);
 			
-			for(int i = 0; i < listWorkers.size(); i++) {
-				listWorkers.set(i, 1);
-			}
+			Integer timeShiftSmall = CollectUtill.timeShiftSmall(list, date, shiftBig, shiftSmall);
 			
 			Integer numWorkers = 0;
 			int numTasks = jobs.size();
@@ -50,6 +56,22 @@ public class App {
 				numWorkers = max.get();
 			}
 			
+			for(int i = 0; i < listWorkers.size(); i++) {
+				if(listWorkers.get(i) > 1 && listWorkers.get(i) < numWorkers) {
+					if(times.get(i) >= listWorkers.get(i)) {
+//						times.set(i,(int) (times.get(i) / listWorkers.get(i)));
+						times.set(i,(int) (times.get(i) / numWorkers));
+					}
+				}
+				if(listWorkers.get(i) >= numWorkers) {
+					listWorkers.set(i, numWorkers);
+					if(times.get(i) >= listWorkers.get(i)) {
+						times.set(i,(int) (times.get(i) / numWorkers));
+					}
+				}
+			}
+		
+
 			String[] workers = {
 				"NV1", "NV2", "NV3",	
 			};
@@ -67,20 +89,21 @@ public class App {
 					} else {
 						variables[i][j] = solver.makeIntVar(0, 1, "");
 					}
+//					variables[i][j] = solver.makeIntVar(0, 1, "");
 				}
 			}
 			
 			
 			for(int i = 0; i < numWorkers; i++) {
-				MPConstraint constraint = solver.makeConstraint(0, timeShiftSmall, "");
+				MPConstraint constraint = solver.makeConstraint(timeShiftSmall/numWorkers, timeShiftSmall, "");
 				for(int j = 0; j < numTasks; j++) {
 					int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
 					constraint.setCoefficient(variables[i][j], time);
 				}
 			}
 			
+			
 			for(int j = 0; j < numTasks; j++) {
-				int bound = listWorkers.get(j) >= numWorkers ? 1 : listWorkers.get(j);
 				MPConstraint constraint = solver.makeConstraint(listWorkers.get(j), listWorkers.get(j), "");
 				for(int i = 0; i < numWorkers; i++) {
 					constraint.setCoefficient(variables[i][j], 1);
@@ -90,13 +113,13 @@ public class App {
 			MPObjective objective = solver.objective();
 			for(int i = 0; i < numWorkers; i++) {
 				for(int j = 0; j < numTasks; j++) {
-					int time = times.get(j) > timeShiftSmall ? (times.get(j) / numWorkers) : times.get(j);
+					int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
 					objective.setCoefficient(variables[i][j], time);
 				}
 			}
 			
-//			objective.setMaximization();
-			objective.setMinimization();
+			objective.setMaximization();
+//			objective.setMinimization();
 			MPSolver.ResultStatus resultStatus = solver.solve();
 			if(resultStatus == MPSolver.ResultStatus.OPTIMAL || resultStatus == MPSolver.ResultStatus.FEASIBLE ) {
 				System.out.println("Cost: " + objective.value());
