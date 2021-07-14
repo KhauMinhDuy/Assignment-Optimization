@@ -20,8 +20,8 @@ public class App {
 		Loader.loadNativeLibraries();
 		
 		String date = "31-May-2021";
-		int shiftBig = 1;
-		int shiftSmall = 11;
+		int shiftBig = 2;
+		int shiftSmall = 14;
 		
 		String path = "src/main/resources/AssignmentData.xlsx";
 		
@@ -35,14 +35,13 @@ public class App {
 			
 			List<Integer> times = CollectUtill.toTimes(list, date, shiftBig, shiftSmall);
 			
-			List<Integer> listWorker = CollectUtill.toListWorker(list, date, shiftBig, shiftSmall);
+			List<Integer> listWorkers = CollectUtill.toListWorker(list, date, shiftBig, shiftSmall);
 			
+			Integer timeShiftSmall = CollectUtill.timeShiftSmall(list, date, shiftBig, shiftSmall);
 			
-			int[] listWorkers2 = {
-//				1,2,1,1,2,1,1,1,1,1,
-				1,1,1,1,1,1,1,1,1,1
-			};
-			
+			for(int i = 0; i < listWorkers.size(); i++) {
+				listWorkers.set(i, 1);
+			}
 			
 			Integer numWorkers = 0;
 			int numTasks = jobs.size();
@@ -54,7 +53,7 @@ public class App {
 			String[] workers = {
 				"NV1", "NV2", "NV3",	
 			};
-			
+				
 			MPSolver solver = MPSolver.createSolver("SCIP");
 			if(solver == null) {
 				return;
@@ -63,7 +62,7 @@ public class App {
 			MPVariable[][] variables = new MPVariable[numWorkers][numTasks];
 			for(int i = 0; i < numWorkers; i++) {
 				for (int j = 0; j < numTasks; j++) {
-					if(listWorkers2[j] >= numWorkers) {
+					if(listWorkers.get(j) >= numWorkers) {
 						variables[i][j] = solver.makeIntVar(1, 1, "");
 					} else {
 						variables[i][j] = solver.makeIntVar(0, 1, "");
@@ -73,32 +72,31 @@ public class App {
 			
 			
 			for(int i = 0; i < numWorkers; i++) {
-				MPConstraint constraint = solver.makeConstraint(0, 60, "");
+				MPConstraint constraint = solver.makeConstraint(0, timeShiftSmall, "");
 				for(int j = 0; j < numTasks; j++) {
-					int time = times.get(j) > 60 ? times.get(j) / numWorkers : times.get(j);
+					int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
 					constraint.setCoefficient(variables[i][j], time);
 				}
 			}
 			
 			for(int j = 0; j < numTasks; j++) {
-				int bound = listWorker.get(j) >= numWorkers ? numWorkers : listWorker.get(j);
-				MPConstraint constraint = solver.makeConstraint(listWorkers2[j], listWorkers2[j], "");
+				int bound = listWorkers.get(j) >= numWorkers ? 1 : listWorkers.get(j);
+				MPConstraint constraint = solver.makeConstraint(listWorkers.get(j), listWorkers.get(j), "");
 				for(int i = 0; i < numWorkers; i++) {
 					constraint.setCoefficient(variables[i][j], 1);
 				}
 			}
 			
-			
 			MPObjective objective = solver.objective();
 			for(int i = 0; i < numWorkers; i++) {
 				for(int j = 0; j < numTasks; j++) {
-					int time = times.get(j) > 60 ? times.get(j) / numWorkers : times.get(j);
+					int time = times.get(j) > timeShiftSmall ? (times.get(j) / numWorkers) : times.get(j);
 					objective.setCoefficient(variables[i][j], time);
 				}
 			}
 			
-			
-			objective.setMaximization();
+//			objective.setMaximization();
+			objective.setMinimization();
 			MPSolver.ResultStatus resultStatus = solver.solve();
 			if(resultStatus == MPSolver.ResultStatus.OPTIMAL || resultStatus == MPSolver.ResultStatus.FEASIBLE ) {
 				System.out.println("Cost: " + objective.value());
@@ -106,7 +104,7 @@ public class App {
 					int s = 0;
 					for(int j = 0; j < numTasks; j++) {
 						if(variables[i][j].solutionValue() > 0.5) {
-							int time = times.get(j) > 60 ? times.get(j) / numWorkers : times.get(j);
+							int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
 							s += time;
 							System.out.println("Worker " + workers[i] + " assigned to task " + jobs.get(j) + ".  Time = " + time +"p");
 						}
