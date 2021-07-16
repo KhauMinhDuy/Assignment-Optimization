@@ -3,6 +3,9 @@ package com.khauminhduy;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
+import org.apache.xml.security.stax.impl.processor.output.XMLSignatureOutputProcessor;
 
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
@@ -20,17 +23,35 @@ public class App {
 		String path = "src/main/resources/AssignmentData.xlsx";
 		try {
 			List<Data> list = ReadFileExcel.getALL(path);
-			System.out.println("CA 1 - 11");
-			process(list, "31-May-2021", 1, 11);
-			System.out.println("=====================================");
-			System.out.println("CA 1 - 12");
-			process(list, "31-May-2021", 1, 12);
-			System.out.println("=====================================");
-			System.out.println("CA 1 - 13");
-			process(list, "31-May-2021", 1, 13);
-			System.out.println("=====================================");
-			System.out.println("CA 2 - 14");
-			process(list, "31-May-2021", 2, 14);
+			
+			Set<String> dates = CollectUtill.toDates(list);
+			for(String date : dates) {
+				
+				Set<Integer> shopId = CollectUtill.toShopId(list, date);
+				
+				for(Integer shopid : shopId) {
+					
+					Set<Integer> shiftBigId = CollectUtill.toShiftBigId(list, date, shopid);
+					
+					for(Integer shiftBig : shiftBigId) {
+						if(shiftBig != null) {
+							Set<Integer> shiftSmallId = CollectUtill.toShiftSmallId(list, date, shopid, shiftBig);
+							
+							for(Integer shiftSmall : shiftSmallId) {
+								
+								if(shiftSmall != null) {
+									System.out.println("Date: " + date + " - Shop: " + shopid + " - Ca Lon: " + shiftBig + " - Ca Nho: " + shiftSmall);
+									process(list, date, shiftBig, shiftSmall);
+									System.out.println("\n ================================================================= \n");
+								}
+							}
+						}
+					}
+					
+				}
+				
+			}
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -42,9 +63,9 @@ public class App {
 		
 		List<String> jobs = CollectUtill.toJobNames(list, date, shiftBig, shiftSmall);
 		
-		Optional<Integer> max = CollectUtill.toWorkers(list, date, shiftBig, shiftSmall);
+		Optional<Integer> max = CollectUtill.toHeadCounts(list, date, shiftBig, shiftSmall);
 		
-		List<Integer> times = CollectUtill.toTimes(list, date, shiftBig, shiftSmall);
+		List<Integer> times = CollectUtill.toMinuteFinishWork(list, date, shiftBig, shiftSmall);
 		
 		List<Integer> listWorkers = CollectUtill.toListWorker(list, date, shiftBig, shiftSmall);
 		
@@ -62,8 +83,8 @@ public class App {
 		for(int i = 0; i < listWorkers.size(); i++) {
 			if(listWorkers.get(i) > 1 && listWorkers.get(i) < numWorkers) {
 				if(times.get(i) >= listWorkers.get(i)) {
-//					times.set(i,(int) (times.get(i) / listWorkers.get(i)));
-					times.set(i,(int) (times.get(i) / numWorkers));
+					times.set(i,(int) (times.get(i) / listWorkers.get(i)));
+//					times.set(i,(int) (times.get(i) / numWorkers));
 				}
 			}
 			if(listWorkers.get(i) >= numWorkers) {
@@ -74,11 +95,6 @@ public class App {
 			}
 		}
 
-
-		String[] workers = {
-			"NV1", "NV2", "NV3",	
-		};
-			
 		MPSolver solver = MPSolver.createSolver("SCIP");
 		if(solver == null) {
 			return;
@@ -125,6 +141,8 @@ public class App {
 		objective.setMinimization();
 		MPSolver.ResultStatus resultStatus = solver.solve();
 		if(resultStatus == MPSolver.ResultStatus.OPTIMAL || resultStatus == MPSolver.ResultStatus.FEASIBLE ) {
+			System.out.println("T/g Ca Lon: " + timeShiftBig);
+			System.out.println("T/g Ca Nho: " + timeShiftSmall);
 			System.out.println("Cost: " + objective.value());
 			for(int i = 0; i < numWorkers; i++) {
 				int s = 0;
@@ -132,10 +150,10 @@ public class App {
 					if(variables[i][j].solutionValue() > 0.5) {
 						int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
 						s += time;
-						System.out.println("Worker " + workers[i] + " assigned to task " + jobs.get(j) + ".  Time = " + time +"p");
+						System.out.println("Worker NV" + (i+1) + " assigned to task " + jobs.get(j) + ".  Time = " + time +"p");
 					}
 				}
-				System.out.println(workers[i] + " => " + s);
+				System.out.println("NV" + (i+1) + " => " + s);
 			}
 		} else {
 			System.out.println("No solution found");

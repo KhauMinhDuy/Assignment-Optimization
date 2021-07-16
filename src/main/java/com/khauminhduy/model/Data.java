@@ -3,7 +3,7 @@ package com.khauminhduy.model;
 public class Data {
 
 	private String date;
-	private String shopId;
+	private Integer shopId;
 	private Integer shiftBig;
 	private Integer shiftSmall;
 	private String shiftName;
@@ -28,11 +28,11 @@ public class Data {
 		this.date = date;
 	}
 
-	public String getShopId() {
+	public Integer getShopId() {
 		return shopId;
 	}
 
-	public void setShopId(String shopId) {
+	public void setShopId(Integer shopId) {
 		this.shopId = shopId;
 	}
 

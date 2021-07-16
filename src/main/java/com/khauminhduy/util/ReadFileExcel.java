@@ -32,20 +32,24 @@ public class ReadFileExcel {
 						data.setDate(cell.toString());
 						break;
 					case 1:
-						data.setShopId(cell.toString());
+						if (!cell.toString().equals("")) {
+							data.setShopId((int) Float.parseFloat(cell.toString()));
+						} else {
+							data.setShopId(null);
+						}
 						break;
 					case 2:
 						if (!cell.toString().equals("")) {
 							data.setShiftBig((int) Float.parseFloat(cell.toString()));
 						} else {
-							data.setShiftBig(0);
+							data.setShiftBig(null);
 						}
 						break;
 					case 3:
 						if (!cell.toString().equals("")) {
 							data.setShiftSmall((int) Float.parseFloat(cell.toString()));
 						} else {
-							data.setShiftSmall(0);
+							data.setShiftSmall(null);
 						}
 						break;
 					case 4:
@@ -55,7 +59,7 @@ public class ReadFileExcel {
 						if (!cell.toString().equals("")) {
 							data.setHeadCount((int) Float.parseFloat(cell.toString()));
 						} else {
-							data.setHeadCount(0);
+							data.setHeadCount(null);
 						}
 						break;
 					case 6:
