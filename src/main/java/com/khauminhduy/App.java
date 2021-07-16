@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.xml.security.stax.impl.processor.output.XMLSignatureOutputProcessor;
-
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
 import com.google.ortools.linearsolver.MPObjective;
@@ -19,10 +17,13 @@ import com.khauminhduy.util.ReadFileExcel;
 public class App {
 
 	public static void main(String[] args) {
+		
 		Loader.loadNativeLibraries();
+		
 		String path = "src/main/resources/AssignmentData.xlsx";
+		
 		try {
-			List<Data> list = ReadFileExcel.getALL(path);
+			List<Data> list = ReadFileExcel.getAllLines(path);
 			
 			Set<String> dates = CollectUtill.toDates(list);
 			for(String date : dates) {
@@ -47,9 +48,7 @@ public class App {
 							}
 						}
 					}
-					
 				}
-				
 			}
 			
 		} catch (IOException e) {
@@ -63,7 +62,7 @@ public class App {
 		
 		List<String> jobs = CollectUtill.toJobNames(list, date, shiftBig, shiftSmall);
 		
-		Optional<Integer> max = CollectUtill.toHeadCounts(list, date, shiftBig, shiftSmall);
+		Optional<Integer> headCount = CollectUtill.toHeadCounts(list, date, shiftBig, shiftSmall);
 		
 		List<Integer> times = CollectUtill.toMinuteFinishWork(list, date, shiftBig, shiftSmall);
 		
@@ -76,26 +75,40 @@ public class App {
 		Integer numWorkers = 0;
 		int numTasks = jobs.size();
 		
-		if(max.isPresent()) {
-			numWorkers = max.get();
+		if(headCount.isPresent()) {
+			numWorkers = headCount.get();
 		}
 		
 		for(int i = 0; i < listWorkers.size(); i++) {
-			if(listWorkers.get(i) > 1 && listWorkers.get(i) < numWorkers) {
+			
+			if(listWorkers.get(i) > 1 && listWorkers.get(i) <= numWorkers) {
 				if(times.get(i) >= listWorkers.get(i)) {
-					times.set(i,(int) (times.get(i) / listWorkers.get(i)));
-//					times.set(i,(int) (times.get(i) / numWorkers));
+					times.set(i, times.get(i) / listWorkers.get(i));
 				}
 			}
-			if(listWorkers.get(i) >= numWorkers) {
+			
+			if(listWorkers.get(i) > numWorkers) {
 				listWorkers.set(i, numWorkers);
 				if(times.get(i) >= listWorkers.get(i)) {
-					times.set(i,(int) (times.get(i) / numWorkers));
+					times.set(i, times.get(i) / listWorkers.get(i));
 				}
 			}
 		}
-
-		MPSolver solver = MPSolver.createSolver("SCIP");
+		
+		for(int i = 0; i < times.size(); i++) {
+			if(times.get(i) > timeShiftSmall) {
+				times.set(i, times.get(i) / numWorkers);
+			}
+		}
+		
+		int max = 0;
+		for(int i = 0; i < listWorkers.size(); i++) {
+			System.out.println("So NV trong CV: " + listWorkers.get(i) + " | T/g Lam CV: " + times.get(i));
+			max += listWorkers.get(i) * times.get(i);
+		}
+		
+		System.out.println("Total Effort: " + max + " | Quy T/g ca nho: " + (timeShiftSmall * numWorkers));
+		MPSolver solver = MPSolver.createSolver("GLOP");
 		if(solver == null) {
 			return;
 		}
@@ -103,21 +116,15 @@ public class App {
 		MPVariable[][] variables = new MPVariable[numWorkers][numTasks];
 		for(int i = 0; i < numWorkers; i++) {
 			for (int j = 0; j < numTasks; j++) {
-				if(listWorkers.get(j) >= numWorkers) {
-					variables[i][j] = solver.makeIntVar(1, 1, "");
-				} else {
-					variables[i][j] = solver.makeIntVar(0, 1, "");
-				}
-//					variables[i][j] = solver.makeIntVar(0, 1, "");
+				variables[i][j] = solver.makeIntVar(0, 1, "");
 			}
 		}
 		
 		
 		for(int i = 0; i < numWorkers; i++) {
-			MPConstraint constraint = solver.makeConstraint(timeShiftSmall/numWorkers, timeShiftSmall, "");
+			MPConstraint constraint = solver.makeConstraint(0, timeShiftSmall, "");
 			for(int j = 0; j < numTasks; j++) {
-				int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
-				constraint.setCoefficient(variables[i][j], time);
+				constraint.setCoefficient(variables[i][j], times.get(j));
 			}
 		}
 		
@@ -132,12 +139,12 @@ public class App {
 		MPObjective objective = solver.objective();
 		for(int i = 0; i < numWorkers; i++) {
 			for(int j = 0; j < numTasks; j++) {
-				int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
-				objective.setCoefficient(variables[i][j], time);
+				objective.setCoefficient(variables[i][j], times.get(j));
 			}
 		}
 		
-//			objective.setMaximization();
+		
+//		objective.setMaximization();
 		objective.setMinimization();
 		MPSolver.ResultStatus resultStatus = solver.solve();
 		if(resultStatus == MPSolver.ResultStatus.OPTIMAL || resultStatus == MPSolver.ResultStatus.FEASIBLE ) {
@@ -148,9 +155,8 @@ public class App {
 				int s = 0;
 				for(int j = 0; j < numTasks; j++) {
 					if(variables[i][j].solutionValue() > 0.5) {
-						int time = times.get(j) > timeShiftSmall ? times.get(j) / numWorkers : times.get(j);
-						s += time;
-						System.out.println("Worker NV" + (i+1) + " assigned to task " + jobs.get(j) + ".  Time = " + time +"p");
+						s += times.get(j);
+						System.out.println("Worker NV" + (i+1) + " assigned to task " + jobs.get(j) + ".  Time = " + times.get(j) +"p");
 					}
 				}
 				System.out.println("NV" + (i+1) + " => " + s);

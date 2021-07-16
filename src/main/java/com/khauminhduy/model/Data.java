@@ -15,10 +15,10 @@ public class Data {
 	private Integer propertiesWork;
 	private Integer listWorkers;
 	private Integer minutesFinishWork;
-	private String hourStart;
-	private String minuteStart;
-	private String hourEnd;
-	private String minuteEnd;
+	private Integer hourStart;
+	private Integer minuteStart;
+	private Integer hourEnd;
+	private Integer minuteEnd;
 
 	public String getDate() {
 		return date;
@@ -140,35 +140,35 @@ public class Data {
 		this.minutesFinishWork = minutesFinishWork;
 	}
 
-	public String getHourStart() {
+	public Integer getHourStart() {
 		return hourStart;
 	}
 
-	public void setHourStart(String hourStart) {
+	public void setHourStart(Integer hourStart) {
 		this.hourStart = hourStart;
 	}
 
-	public String getMinuteStart() {
+	public Integer getMinuteStart() {
 		return minuteStart;
 	}
 
-	public void setMinuteStart(String minuteStart) {
+	public void setMinuteStart(Integer minuteStart) {
 		this.minuteStart = minuteStart;
 	}
 
-	public String getHourEnd() {
+	public Integer getHourEnd() {
 		return hourEnd;
 	}
 
-	public void setHourEnd(String hourEnd) {
+	public void setHourEnd(Integer hourEnd) {
 		this.hourEnd = hourEnd;
 	}
 
-	public String getMinuteEnd() {
+	public Integer getMinuteEnd() {
 		return minuteEnd;
 	}
 
-	public void setMinuteEnd(String minuteEnd) {
+	public void setMinuteEnd(Integer minuteEnd) {
 		this.minuteEnd = minuteEnd;
 	}
 

@@ -10,6 +10,8 @@ import com.khauminhduy.model.Data;
 
 public class CollectUtill {
 	
+	private CollectUtill() {}
+	
 	public static List<Integer> toMinuteFinishWork(List<Data> list, String date, int shiftBig, int shiftSmall) {
 		return list.stream()
 				.filter(e -> e.getDate().equalsIgnoreCase(date))
@@ -65,7 +67,9 @@ public class CollectUtill {
 				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall() == shiftSmall : false)
 				.map(Data::getTimeShiftBig)
 				.max(Integer::compareTo);
-		 if(max.isPresent()) return max.get();
+		 if(max.isPresent()) {
+			 return max.get();
+		 }
 		 throw new IllegalArgumentException("khong tim thay thoi gian lam viec ca lon");
 	}
 	
@@ -107,5 +111,7 @@ public class CollectUtill {
 			.forEach(shiftSmallId::add);
 		return shiftSmallId;
 	}
+	
+	
 	
 }

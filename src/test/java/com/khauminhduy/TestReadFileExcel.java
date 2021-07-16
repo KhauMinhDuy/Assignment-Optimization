@@ -1,13 +1,12 @@
 package com.khauminhduy;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ class TestReadFileExcel {
 	void testReadFile() {
 		try {
 			XSSFWorkbook workbook = ReadFileExcel.open(path);
-			assertTrue(workbook != null);
+			assertNotNull(workbook);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -33,7 +32,7 @@ class TestReadFileExcel {
 	@Test
 	void testGetALL() {
 		try {
-			List<Data> list = ReadFileExcel.getALL(path);
+			List<Data> list = ReadFileExcel.getAllLines(path);
 			assertEquals(593, list.size());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -51,7 +50,7 @@ class TestReadFileExcel {
 	@Test
 	void testListDate() {
 		try {
-			List<Data> lists = ReadFileExcel.getALL(path);
+			List<Data> lists = ReadFileExcel.getAllLines(path);
 			Set<String> dates = new LinkedHashSet<>();
 			lists.stream()
 					.map(e -> e.getDate())
@@ -66,7 +65,7 @@ class TestReadFileExcel {
 	@Test
 	void testListShopId() {
 		try {
-			List<Data> lists = ReadFileExcel.getALL(path);
+			List<Data> lists = ReadFileExcel.getAllLines(path);
 			Set<String> dates = new LinkedHashSet<>();
 			lists.stream()
 					.map(e -> e.getDate())
@@ -86,7 +85,7 @@ class TestReadFileExcel {
 	@Test
 	void testListShiftBig() {
 		try {
-			List<Data> lists = ReadFileExcel.getALL(path);
+			List<Data> lists = ReadFileExcel.getAllLines(path);
 			Set<String> dates = new LinkedHashSet<>();
 			lists.stream()
 					.map(e -> e.getDate())
@@ -116,7 +115,7 @@ class TestReadFileExcel {
 	@Test
 	void testListShiftSmall() {
 		try {
-			List<Data> lists = ReadFileExcel.getALL(path);
+			List<Data> lists = ReadFileExcel.getAllLines(path);
 			Set<String> dates = new LinkedHashSet<>();
 			lists.stream()
 					.map(e -> e.getDate())

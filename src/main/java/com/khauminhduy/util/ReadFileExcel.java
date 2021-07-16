@@ -17,13 +17,12 @@ public class ReadFileExcel {
 		return new XSSFWorkbook(path);
 	}
 
-	public static List<Data> getALL(String path) throws IOException {
+	public static List<Data> getAllLines(String path) throws IOException {
 		List<Data> datas = new ArrayList<>();
 		XSSFWorkbook workbook = open(path);
 		XSSFSheet sheet = workbook.getSheetAt(0);
 
-		Iterator<Row> rowIterator = sheet.rowIterator();
-		rowIterator.forEachRemaining(e -> {
+		sheet.rowIterator().forEachRemaining(e -> {
 			Data data = new Data();
 			if (e.getRowNum() != 0) {
 				e.cellIterator().forEachRemaining(cell -> {
@@ -80,8 +79,18 @@ public class ReadFileExcel {
 						data.setJobName(cell.toString());
 						break;
 					case 9:
+						if(!cell.toString().equals("")) {
+							data.setTypeWork((int) Float.parseFloat(cell.toString()));
+						} else {
+							data.setTypeWork(null);
+						}
 						break;
 					case 10:
+						if(!cell.toString().equals("")) {
+							data.setPropertiesWork((int) Float.parseFloat(cell.toString()));
+						} else {
+							data.setPropertiesWork(null);
+						}
 						break;
 					case 11:
 						if (!cell.toString().equals("")) {
@@ -95,6 +104,34 @@ public class ReadFileExcel {
 							data.setMinutesFinishWork((int) Float.parseFloat(cell.toString()));
 						} else {
 							data.setMinutesFinishWork(0);
+						}
+						break;
+					case 13:
+						if(!cell.toString().equals("")) {
+							data.setHourStart((int) Float.parseFloat(cell.toString()));
+						} else {
+							data.setHourStart(null);
+						}
+						break;
+					case 14:
+						if(!cell.toString().equals("")) {
+							data.setMinuteStart((int) Float.parseFloat(cell.toString()));
+						} else {
+							data.setMinuteStart(null);
+						}
+						break;
+					case 15:
+						if(!cell.toString().equals("")) {
+							data.setHourEnd((int) Float.parseFloat(cell.toString()));
+						} else {
+							data.setHourEnd(null);
+						}
+						break;
+					case 16:
+						if(!cell.toString().equals("")) {
+							data.setMinuteEnd((int) Float.parseFloat(cell.toString()));
+						} else {
+							data.setMinuteEnd(null);
 						}
 						break;
 
