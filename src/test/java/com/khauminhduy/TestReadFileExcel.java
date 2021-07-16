@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +23,9 @@ class TestReadFileExcel {
 		try {
 			XSSFWorkbook workbook = ReadFileExcel.open(path);
 			assertNotNull(workbook);
+			
+			int numberOfSheets = workbook.getNumberOfSheets();
+			assertEquals(1, numberOfSheets);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -51,12 +53,8 @@ class TestReadFileExcel {
 	void testListDate() {
 		try {
 			List<Data> lists = ReadFileExcel.getAllLines(path);
-			Set<String> dates = new LinkedHashSet<>();
-			lists.stream()
-					.map(e -> e.getDate())
-					.forEach(dates::add);
+			Set<String> dates = CollectUtill.toDates(lists);
 			dates.forEach(System.out::println);
-			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -66,10 +64,7 @@ class TestReadFileExcel {
 	void testListShopId() {
 		try {
 			List<Data> lists = ReadFileExcel.getAllLines(path);
-			Set<String> dates = new LinkedHashSet<>();
-			lists.stream()
-					.map(e -> e.getDate())
-					.forEach(dates::add);
+			Set<String> dates = CollectUtill.toDates(lists);
 			for(String date : dates) {
 				Set<Integer> shopId = CollectUtill.toShopId(lists, date);
 				for(Integer shop : shopId) {
@@ -86,10 +81,7 @@ class TestReadFileExcel {
 	void testListShiftBig() {
 		try {
 			List<Data> lists = ReadFileExcel.getAllLines(path);
-			Set<String> dates = new LinkedHashSet<>();
-			lists.stream()
-					.map(e -> e.getDate())
-					.forEach(dates::add);
+			Set<String> dates = CollectUtill.toDates(lists);
 			for(String date : dates) {
 				
 				Set<Integer> shopId = CollectUtill.toShopId(lists, date);
@@ -116,10 +108,7 @@ class TestReadFileExcel {
 	void testListShiftSmall() {
 		try {
 			List<Data> lists = ReadFileExcel.getAllLines(path);
-			Set<String> dates = new LinkedHashSet<>();
-			lists.stream()
-					.map(e -> e.getDate())
-					.forEach(dates::add);
+			Set<String> dates = CollectUtill.toDates(lists);
 			for(String date : dates) {
 				Set<Integer> shopId = CollectUtill.toShopId(lists, date);
 				for(Integer shop : shopId) {

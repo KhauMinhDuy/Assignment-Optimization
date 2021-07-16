@@ -23,6 +23,7 @@ public class App {
 		String path = "src/main/resources/AssignmentData.xlsx";
 		
 		try {
+			
 			List<Data> list = ReadFileExcel.getAllLines(path);
 			
 			Set<String> dates = CollectUtill.toDates(list);
@@ -81,10 +82,10 @@ public class App {
 		
 		for(int i = 0; i < listWorkers.size(); i++) {
 			
-			if(listWorkers.get(i) > 1 && listWorkers.get(i) <= numWorkers) {
-				if(times.get(i) >= listWorkers.get(i)) {
-					times.set(i, times.get(i) / listWorkers.get(i));
-				}
+			if(listWorkers.get(i) > 1 && 
+					listWorkers.get(i) <= numWorkers && 
+					times.get(i) >= listWorkers.get(i)) {
+				times.set(i, times.get(i) / listWorkers.get(i));
 			}
 			
 			if(listWorkers.get(i) > numWorkers) {
@@ -93,6 +94,7 @@ public class App {
 					times.set(i, times.get(i) / listWorkers.get(i));
 				}
 			}
+			
 		}
 		
 		for(int i = 0; i < times.size(); i++) {
