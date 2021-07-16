@@ -12,6 +12,13 @@ public class CollectUtill {
 	
 	private CollectUtill() {}
 	
+	public static List<Data> getDataByDateAndShopId(List<Data> lists, String date, Integer shopId) {
+		return lists.stream()
+				.filter(e -> e.getDate().equalsIgnoreCase(date))
+				.filter(e -> e.getShopId().equals(shopId))
+				.collect(Collectors.toList());
+	}
+	
 	public static List<Integer> toMinuteFinishWork(List<Data> list, String date, int shiftBig, int shiftSmall) {
 		return list.stream()
 				.filter(e -> e.getDate().equalsIgnoreCase(date))
@@ -21,13 +28,17 @@ public class CollectUtill {
 				.collect(Collectors.toList());
 	}
 
-	public static Optional<Integer> toHeadCounts(List<Data> list, String date, int shiftBig, int shiftSmall) {
-		return list.stream()
+	public static Integer toHeadCounts(List<Data> list, String date, Integer shiftBig) {
+		Optional<Integer> headcount = list.stream()
 				.filter(e -> e.getDate().equalsIgnoreCase(date))
-				.filter(e -> e.getShiftBig() != null ? e.getShiftBig() == shiftBig : false)
-				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall() == shiftSmall : false)
-				.map(Data::getHeadCount)
-				.max(Integer::compareTo);
+				.filter(e -> e.getShiftBig() != null ? e.getShiftBig().equals(shiftBig) : false)
+				.findFirst()
+				.map(Data::getHeadCount);
+				
+		if(headcount.isPresent()) {
+			return headcount.get();
+		}
+		throw new IllegalArgumentException("khong tim thay headcount");
 	}
 
 	public static List<String> toJobNames(List<Data> list, String date, int shiftBig, int shiftSmall) {
@@ -54,19 +65,18 @@ public class CollectUtill {
 				.filter(e -> e.getDate().equalsIgnoreCase(date))
 				.filter(e -> e.getShiftBig() != null ? e.getShiftBig() == shiftBig : false)
 				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall() == shiftSmall : false)
-				.map(Data::getTimeShiftSmall)
-				.max(Integer::compareTo);
+				.findFirst()
+				.map(Data::getTimeShiftSmall);
 		 if(max.isPresent()) return max.get();
 		 throw new IllegalArgumentException("khong tim thay thoi gian lam viec ca nho");
 	}
 	
-	public static Integer timeShiftBig(List<Data> list, String date, int shiftBig, int shiftSmall) {
+	public static Integer timeShiftBig(List<Data> list, String date, Integer shiftBig) {
 		 Optional<Integer> max = list.stream()
 				.filter(e -> e.getDate().equalsIgnoreCase(date))
-				.filter(e -> e.getShiftBig() != null ? e.getShiftBig() == shiftBig : false)
-				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall() == shiftSmall : false)
-				.map(Data::getTimeShiftBig)
-				.max(Integer::compareTo);
+				.filter(e -> e.getShiftBig() != null ? e.getShiftBig().equals(shiftBig) : false)
+				.findFirst()
+				.map(Data::getTimeShiftBig);
 		 if(max.isPresent()) {
 			 return max.get();
 		 }
@@ -113,5 +123,24 @@ public class CollectUtill {
 	}
 	
 	
+	public static List<Integer> toTypeWorks(List<Data> lists, String date, Integer shopId, 
+			Integer shiftBigId, Integer shiftSmallId) {
+		
+		return lists.stream()
+				.filter(e -> e.getDate().equalsIgnoreCase(date))
+				.filter(e -> e.getShopId() != null ? e.getShopId().equals(shopId) : false)
+				.filter(e -> e.getShiftBig() != null ? e.getShiftBig().equals(shiftBigId) : false)
+				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall().equals(shiftSmallId) : false)
+				.map(Data::getTypeWork)
+				.collect(Collectors.toList());
+	}
+	
+	public static List<Data> getDataByTypeWork(List<Data> lists, String date, Integer shopId, Integer shiftBig) {
+		return lists.stream()
+				.filter(e -> e.getDate().equalsIgnoreCase(date))
+				.filter(e -> e.getShopId().equals(shopId))
+				.filter(e -> e.getShiftBig() != null ? e.getShiftBig().equals(shiftBig) : false)
+				.collect(Collectors.toList());
+	}
 	
 }

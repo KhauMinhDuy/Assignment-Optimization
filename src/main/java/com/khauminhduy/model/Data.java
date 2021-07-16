@@ -176,9 +176,10 @@ public class Data {
 	public String toString() {
 		return "Data [date=" + date + ", shopId=" + shopId + ", shiftBig=" + shiftBig + ", shiftSmall=" + shiftSmall
 				+ ", shiftName=" + shiftName + ", headCount=" + headCount + ", timeShiftSmall=" + timeShiftSmall
-				+ ", timeShiftBig=" + timeShiftBig + ", jobName=" + jobName + ", loaiCV=" + typeWork + ", tcCV="
-				+ propertiesWork + ", soNguoiLam=" + listWorkers + ", soPhutHoanThanh=" + minutesFinishWork + ", gioBD="
-				+ hourStart + ", phutBD=" + minuteStart + ", gioKT=" + hourEnd + ", phutKT=" + minuteEnd + "]";
+				+ ", timeShiftBig=" + timeShiftBig + ", jobName=" + jobName + ", typeWork=" + typeWork
+				+ ", propertiesWork=" + propertiesWork + ", listWorkers=" + listWorkers + ", minutesFinishWork="
+				+ minutesFinishWork + ", hourStart=" + hourStart + ", minuteStart=" + minuteStart + ", hourEnd="
+				+ hourEnd + ", minuteEnd=" + minuteEnd + "]";
 	}
 
 }

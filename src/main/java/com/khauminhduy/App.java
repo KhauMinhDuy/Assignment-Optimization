@@ -1,9 +1,11 @@
 package com.khauminhduy;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import com.google.ortools.Loader;
 import com.google.ortools.linearsolver.MPConstraint;
@@ -11,10 +13,14 @@ import com.google.ortools.linearsolver.MPObjective;
 import com.google.ortools.linearsolver.MPSolver;
 import com.google.ortools.linearsolver.MPVariable;
 import com.khauminhduy.model.Data;
+import com.khauminhduy.model.DataOutput;
 import com.khauminhduy.util.CollectUtill;
 import com.khauminhduy.util.ReadFileExcel;
+import com.khauminhduy.util.WriteFileExcel;
 
 public class App {
+	
+	private static List<DataOutput> listOutput = new ArrayList<>();
 
 	public static void main(String[] args) {
 		
@@ -27,6 +33,7 @@ public class App {
 			List<Data> list = ReadFileExcel.getAllLines(path);
 			
 			Set<String> dates = CollectUtill.toDates(list);
+			
 			for(String date : dates) {
 				
 				Set<Integer> shopId = CollectUtill.toShopId(list, date);
@@ -42,15 +49,18 @@ public class App {
 							for(Integer shiftSmall : shiftSmallId) {
 								
 								if(shiftSmall != null) {
+									
 									System.out.println("Date: " + date + " - Shop: " + shopid + " - Ca Lon: " + shiftBig + " - Ca Nho: " + shiftSmall);
-									process(list, date, shiftBig, shiftSmall);
+									process(list, date, shopid, shiftBig, shiftSmall);
 									System.out.println("\n ================================================================= \n");
+									
 								}
 							}
 						}
 					}
 				}
 			}
+			exportData(listOutput);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -58,58 +68,71 @@ public class App {
 		
 	}
 
-	private static void process(List<Data> list,String date, int shiftBig, int shiftSmall) {
+	private static void exportData(List<DataOutput> listOutput2) {
+		try {
+			WriteFileExcel.readAll(listOutput2, "src/main/resources/dataoutput.xlsx");
+		} catch (InvalidFormatException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private static void process(List<Data> list,String date, Integer shopId, int shiftBig, int shiftSmall) {
 		
 		
 		List<String> jobs = CollectUtill.toJobNames(list, date, shiftBig, shiftSmall);
 		
-		Optional<Integer> headCount = CollectUtill.toHeadCounts(list, date, shiftBig, shiftSmall);
+		Integer headCount = CollectUtill.toHeadCounts(list, date, shiftBig);
 		
-		List<Integer> times = CollectUtill.toMinuteFinishWork(list, date, shiftBig, shiftSmall);
+		List<Integer> timeWorks = CollectUtill.toMinuteFinishWork(list, date, shiftBig, shiftSmall);
 		
-		List<Integer> listWorkers = CollectUtill.toListWorker(list, date, shiftBig, shiftSmall);
+		List<Integer> listWorker = CollectUtill.toListWorker(list, date, shiftBig, shiftSmall);
 		
-		Integer timeShiftBig = CollectUtill.timeShiftBig(list, date, shiftBig, shiftSmall);
+		Integer timeShiftBig = CollectUtill.timeShiftBig(list, date, shiftBig);
 		
 		Integer timeShiftSmall = CollectUtill.timeShiftSmall(list, date, shiftBig, shiftSmall);
 		
-		Integer numWorkers = 0;
+		List<Integer> typeWorks = CollectUtill.toTypeWorks(list, date, 6581, shiftBig, shiftSmall);
+		
+		Integer numWorkers = headCount;
 		int numTasks = jobs.size();
 		
-		if(headCount.isPresent()) {
-			numWorkers = headCount.get();
-		}
-		
-		for(int i = 0; i < listWorkers.size(); i++) {
+		for(int i = 0; i < listWorker.size(); i++) {
 			
-			if(listWorkers.get(i) > 1 && 
-					listWorkers.get(i) <= numWorkers && 
-					times.get(i) >= listWorkers.get(i)) {
-				times.set(i, times.get(i) / listWorkers.get(i));
+			if(listWorker.get(i) > 1 && 
+					listWorker.get(i) <= numWorkers && 
+					timeWorks.get(i) >= listWorker.get(i)) {
+				
+				timeWorks.set(i, timeWorks.get(i) / listWorker.get(i));
+				
 			}
 			
-			if(listWorkers.get(i) > numWorkers) {
-				listWorkers.set(i, numWorkers);
-				if(times.get(i) >= listWorkers.get(i)) {
-					times.set(i, times.get(i) / listWorkers.get(i));
+			if(listWorker.get(i) > numWorkers) {
+				listWorker.set(i, numWorkers);
+				if(timeWorks.get(i) >= listWorker.get(i)) {
+					timeWorks.set(i, timeWorks.get(i) / listWorker.get(i));
 				}
 			}
 			
 		}
 		
-		for(int i = 0; i < times.size(); i++) {
-			if(times.get(i) > timeShiftSmall) {
-				times.set(i, times.get(i) / numWorkers);
+		for(int i = 0; i < timeWorks.size(); i++) {
+			if(timeWorks.get(i) > timeShiftSmall) {
+				timeWorks.set(i, timeWorks.get(i) / numWorkers);
 			}
 		}
 		
 		int max = 0;
-		for(int i = 0; i < listWorkers.size(); i++) {
-			System.out.println("So NV trong CV: " + listWorkers.get(i) + " | T/g Lam CV: " + times.get(i));
-			max += listWorkers.get(i) * times.get(i);
+		for(int i = 0; i < listWorker.size(); i++) {
+			System.out.println("So NV trong CV: " + listWorker.get(i) + " | T/g Lam CV: " + timeWorks.get(i) +
+					" | Loai CV: " + typeWorks.get(i));
+			max += listWorker.get(i) * timeWorks.get(i);
 		}
 		
 		System.out.println("Total Effort: " + max + " | Quy T/g ca nho: " + (timeShiftSmall * numWorkers));
+		
+		
 		MPSolver solver = MPSolver.createSolver("GLOP");
 		if(solver == null) {
 			return;
@@ -126,13 +149,13 @@ public class App {
 		for(int i = 0; i < numWorkers; i++) {
 			MPConstraint constraint = solver.makeConstraint(0, timeShiftSmall, "");
 			for(int j = 0; j < numTasks; j++) {
-				constraint.setCoefficient(variables[i][j], times.get(j));
+				constraint.setCoefficient(variables[i][j], timeWorks.get(j));
 			}
 		}
 		
 		
 		for(int j = 0; j < numTasks; j++) {
-			MPConstraint constraint = solver.makeConstraint(listWorkers.get(j), listWorkers.get(j), "");
+			MPConstraint constraint = solver.makeConstraint(listWorker.get(j), listWorker.get(j), "");
 			for(int i = 0; i < numWorkers; i++) {
 				constraint.setCoefficient(variables[i][j], 1);
 			}
@@ -141,15 +164,16 @@ public class App {
 		MPObjective objective = solver.objective();
 		for(int i = 0; i < numWorkers; i++) {
 			for(int j = 0; j < numTasks; j++) {
-				objective.setCoefficient(variables[i][j], times.get(j));
+				objective.setCoefficient(variables[i][j], timeWorks.get(j));
 			}
 		}
 		
 		
-//		objective.setMaximization();
 		objective.setMinimization();
 		MPSolver.ResultStatus resultStatus = solver.solve();
+		List<DataOutput> output = new ArrayList<>();;
 		if(resultStatus == MPSolver.ResultStatus.OPTIMAL || resultStatus == MPSolver.ResultStatus.FEASIBLE ) {
+			
 			System.out.println("T/g Ca Lon: " + timeShiftBig);
 			System.out.println("T/g Ca Nho: " + timeShiftSmall);
 			System.out.println("Cost: " + objective.value());
@@ -157,8 +181,16 @@ public class App {
 				int s = 0;
 				for(int j = 0; j < numTasks; j++) {
 					if(variables[i][j].solutionValue() > 0.5) {
-						s += times.get(j);
-						System.out.println("Worker NV" + (i+1) + " assigned to task " + jobs.get(j) + ".  Time = " + times.get(j) +"p");
+						s += timeWorks.get(j);
+						System.out.println("Worker NV" + (i+1) + " assigned to task " 
+										+ jobs.get(j) + ".  Time = " + timeWorks.get(j) +"p");
+						listOutput.add(new DataOutput(
+								date, shopId, 
+								shiftBig, "NV" + (i+1) ,	
+								false, false, 
+								shiftSmall, 
+								jobs.get(j), timeWorks.get(j),
+								null, null));
 					}
 				}
 				System.out.println("NV" + (i+1) + " => " + s);
@@ -166,6 +198,8 @@ public class App {
 		} else {
 			System.out.println("No solution found");
 		}
+		
+		
 	}
 
 }

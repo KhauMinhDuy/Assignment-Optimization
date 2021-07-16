@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
@@ -131,6 +132,101 @@ class TestReadFileExcel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	void testListTypeWork() {
+		try {
+			List<Data> lists = ReadFileExcel.getAllLines(path);
+			Set<String> dates = CollectUtill.toDates(lists);
+			for(String date : dates) {
+				Set<Integer> shopId = CollectUtill.toShopId(lists, date);
+				for(Integer shop : shopId) {
+					
+					Set<Integer> shiftBigId = CollectUtill.toShiftBigId(lists, date, shop);
+					
+					for(Integer shiftBig : shiftBigId) {
+						
+						Set<Integer> shiftSmallId = CollectUtill.toShiftSmallId(lists, date, shop, shiftBig);
+						
+						for(Integer shiftSmall : shiftSmallId) {
+							
+							List<Integer> typeWorks = CollectUtill.toTypeWorks(lists, date, shop, shiftBig, shiftSmall);
+							
+							for(Integer typeWork : typeWorks) {
+								System.out.println(date + " => " + shop + " => " + shiftBig + " => " 
+										+ shiftSmall + " => " + typeWork);
+							}
+							
+						}
+						
+					}
+					
+				}
+			}
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	@Test
+	void testGetDataByDateAndShopID() {
+		
+		try {
+			List<Data> lists = ReadFileExcel.getAllLines(path);
+			
+			List<Data> dataByDateAndShopId = CollectUtill.getDataByDateAndShopId(lists, "31-May-2021", 6581);
+			dataByDateAndShopId.stream()
+				.forEach(System.out::println);
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	@Test
+	void testSortTypeWork() {
+		
+		try {
+			List<Data> lists = ReadFileExcel.getAllLines(path);
+			
+			List<Data> dataByDateAndShopId = CollectUtill.getDataByTypeWork(lists, "31-May-2021", 6581, 1);
+			dataByDateAndShopId.stream()
+				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall().equals(11) : false)
+				.sorted(Comparator.comparing(Data::getTypeWork))
+				.forEach(e -> {
+					System.out.println(e.getDate() + " " + e.getShopId() + " " + 
+							e.getShiftBig() + " " + e.getShiftSmall() + " " +
+							e.getTypeWork());
+				});
+			
+			
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	@Test
+	void testFindTypeWork() {
+		
+		try {
+			List<Data> lists = ReadFileExcel.getAllLines(path);
+			
+			List<Data> dataByDateAndShopId = CollectUtill.getDataByTypeWork(lists, "31-May-2021", 6581, 1);
+			
+			
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 }

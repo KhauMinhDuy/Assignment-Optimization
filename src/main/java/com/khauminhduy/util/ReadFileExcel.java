@@ -10,6 +10,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.khauminhduy.model.Data;
 
 public class ReadFileExcel {
+	
+	private ReadFileExcel() {}
 
 	public static XSSFWorkbook open(String path) throws IOException {
 		return new XSSFWorkbook(path);
