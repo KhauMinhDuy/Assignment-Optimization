@@ -1,6 +1,5 @@
 package com.khauminhduy.util;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,7 +17,7 @@ public class WriteFileExcel {
 
 	private WriteFileExcel() {}
 	
-	public static void readAll(List<DataOutput> lists ,String path) throws InvalidFormatException, IOException {
+	public static void writeAll(List<DataOutput> lists ,String path) throws InvalidFormatException, IOException {
 		String shopId = String.valueOf(lists.get(0).getShopId());
 		
 		try (XSSFWorkbook workbook = new XSSFWorkbook();
@@ -43,7 +42,7 @@ public class WriteFileExcel {
 			cell7.setCellValue("Ca Nho");
 			XSSFCell cell8 = rowTitle.createCell(7);
 			cell8.setCellValue("Ten CV");
-			sheet.setColumnWidth(7, 30000);
+			
 			XSSFCell cell9 = rowTitle.createCell(8);
 			cell9.setCellValue("Total Minute");
 			XSSFCell cell10 = rowTitle.createCell(9);
@@ -51,6 +50,19 @@ public class WriteFileExcel {
 			XSSFCell cell11 = rowTitle.createCell(10);
 			cell11.setCellValue("MinuteStart");
 			sheet.setColumnWidth(0, 3000);
+			sheet.setColumnWidth(1, 3000);
+			sheet.setColumnWidth(2, 3000);
+			sheet.setColumnWidth(3, 3000);
+			sheet.setColumnWidth(4, 3000);
+			sheet.setColumnWidth(5, 3000);
+			sheet.setColumnWidth(6, 3000);
+			sheet.setColumnWidth(7, 30000);
+			sheet.setColumnWidth(8, 3000);
+			sheet.setColumnWidth(9, 3000);
+			sheet.setColumnWidth(10, 3000);
+			sheet.setColumnWidth(11, 3000);
+			
+			
 			
 			int row = 1;
 			for(DataOutput output : lists) {
@@ -74,9 +86,9 @@ public class WriteFileExcel {
 				XSSFCell c9 = rowData.createCell(8);
 				c9.setCellValue(output.getTotalMinute());
 				XSSFCell c10 = rowData.createCell(9);
-				c10.setCellValue(5);
+				c10.setCellValue(output.getHourStart());
 				XSSFCell c11 = rowData.createCell(10);
-				c11.setCellValue(30);
+				c11.setCellValue(output.getMinuteStart());
 			}
 			
 			

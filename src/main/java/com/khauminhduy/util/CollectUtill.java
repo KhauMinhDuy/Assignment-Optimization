@@ -143,4 +143,34 @@ public class CollectUtill {
 				.collect(Collectors.toList());
 	}
 	
+	public static Integer toHourStart(List<Data> lists, String date, Integer shopId, Integer shiftBig, Integer shiftSmall) {
+		Optional<Integer> hourStart = lists.stream()
+				.filter(e -> e.getDate().equalsIgnoreCase(date))
+				.filter(e -> e.getShopId().equals(shopId))
+				.filter(e -> e.getShiftBig() != null ? e.getShiftBig().equals(shiftBig) : false)
+				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall().equals(shiftSmall) : false)
+				.findFirst()
+				.map(Data::getHourStart);
+		if(hourStart.isPresent()) {
+			return hourStart.get();
+		}
+		throw new IllegalArgumentException("khong tim thay hour Start");
+				
+	}
+	
+	public static Integer toMinuteStart(List<Data> lists, String date, Integer shopId, Integer shiftBig, Integer shiftSmall) {
+		Optional<Integer> minuteStart = lists.stream()
+				.filter(e -> e.getDate().equalsIgnoreCase(date))
+				.filter(e -> e.getShopId().equals(shopId))
+				.filter(e -> e.getShiftBig() != null ? e.getShiftBig().equals(shiftBig) : false)
+				.filter(e -> e.getShiftSmall() != null ? e.getShiftSmall().equals(shiftSmall) : false)
+				.findFirst()
+				.map(Data::getMinuteStart);
+		if(minuteStart.isPresent()) {
+			return minuteStart.get();
+		}
+		throw new IllegalArgumentException("khong tim thay Minute Start");
+				
+	}
+	
 }

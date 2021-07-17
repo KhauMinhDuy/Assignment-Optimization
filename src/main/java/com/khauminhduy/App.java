@@ -43,7 +43,9 @@ public class App {
 					Set<Integer> shiftBigId = CollectUtill.toShiftBigId(list, date, shopid);
 					
 					for(Integer shiftBig : shiftBigId) {
+						
 						if(shiftBig != null) {
+							
 							Set<Integer> shiftSmallId = CollectUtill.toShiftSmallId(list, date, shopid, shiftBig);
 							
 							for(Integer shiftSmall : shiftSmallId) {
@@ -60,6 +62,7 @@ public class App {
 					}
 				}
 			}
+			
 			exportData(listOutput);
 			
 		} catch (IOException e) {
@@ -70,16 +73,14 @@ public class App {
 
 	private static void exportData(List<DataOutput> listOutput2) {
 		try {
-			WriteFileExcel.readAll(listOutput2, "src/main/resources/dataoutput.xlsx");
-		} catch (InvalidFormatException e) {
+			WriteFileExcel.writeAll(listOutput2, "src/main/resources/dataoutput.xlsx");
+			System.out.println("File output: src/main/resources/dataoutput.xlsx");
+		} catch (InvalidFormatException | IOException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 
 	private static void process(List<Data> list,String date, Integer shopId, int shiftBig, int shiftSmall) {
-		
 		
 		List<String> jobs = CollectUtill.toJobNames(list, date, shiftBig, shiftSmall);
 		
@@ -93,23 +94,26 @@ public class App {
 		
 		Integer timeShiftSmall = CollectUtill.timeShiftSmall(list, date, shiftBig, shiftSmall);
 		
-		List<Integer> typeWorks = CollectUtill.toTypeWorks(list, date, 6581, shiftBig, shiftSmall);
+		List<Integer> typeWorks = CollectUtill.toTypeWorks(list, date, shopId, shiftBig, shiftSmall);
 		
-		Integer numWorkers = headCount;
+		Integer hourStart = CollectUtill.toHourStart(list, date, shopId, shiftBig, shiftSmall);
+		Integer minuteStart = CollectUtill.toMinuteStart(list, date, shopId, shiftBig, shiftSmall);
+		
+//		Integer numWorkers = headCount;
 		int numTasks = jobs.size();
 		
 		for(int i = 0; i < listWorker.size(); i++) {
 			
 			if(listWorker.get(i) > 1 && 
-					listWorker.get(i) <= numWorkers && 
+					listWorker.get(i) <= headCount && 
 					timeWorks.get(i) >= listWorker.get(i)) {
 				
 				timeWorks.set(i, timeWorks.get(i) / listWorker.get(i));
 				
 			}
 			
-			if(listWorker.get(i) > numWorkers) {
-				listWorker.set(i, numWorkers);
+			if(listWorker.get(i) > headCount) {
+				listWorker.set(i, headCount);
 				if(timeWorks.get(i) >= listWorker.get(i)) {
 					timeWorks.set(i, timeWorks.get(i) / listWorker.get(i));
 				}
@@ -119,7 +123,7 @@ public class App {
 		
 		for(int i = 0; i < timeWorks.size(); i++) {
 			if(timeWorks.get(i) > timeShiftSmall) {
-				timeWorks.set(i, timeWorks.get(i) / numWorkers);
+				timeWorks.set(i, timeWorks.get(i) / headCount);
 			}
 		}
 		
@@ -130,7 +134,7 @@ public class App {
 			max += listWorker.get(i) * timeWorks.get(i);
 		}
 		
-		System.out.println("Total Effort: " + max + " | Quy T/g ca nho: " + (timeShiftSmall * numWorkers));
+		System.out.println("Total Effort: " + max + " | Quy T/g ca nho: " + (timeShiftSmall * headCount));
 		
 		
 		MPSolver solver = MPSolver.createSolver("GLOP");
@@ -138,15 +142,15 @@ public class App {
 			return;
 		}
 		
-		MPVariable[][] variables = new MPVariable[numWorkers][numTasks];
-		for(int i = 0; i < numWorkers; i++) {
+		MPVariable[][] variables = new MPVariable[headCount][numTasks];
+		for(int i = 0; i < headCount; i++) {
 			for (int j = 0; j < numTasks; j++) {
 				variables[i][j] = solver.makeIntVar(0, 1, "");
 			}
 		}
 		
 		
-		for(int i = 0; i < numWorkers; i++) {
+		for(int i = 0; i < headCount; i++) {
 			MPConstraint constraint = solver.makeConstraint(0, timeShiftSmall, "");
 			for(int j = 0; j < numTasks; j++) {
 				constraint.setCoefficient(variables[i][j], timeWorks.get(j));
@@ -156,13 +160,13 @@ public class App {
 		
 		for(int j = 0; j < numTasks; j++) {
 			MPConstraint constraint = solver.makeConstraint(listWorker.get(j), listWorker.get(j), "");
-			for(int i = 0; i < numWorkers; i++) {
+			for(int i = 0; i < headCount; i++) {
 				constraint.setCoefficient(variables[i][j], 1);
 			}
 		}
 		
 		MPObjective objective = solver.objective();
-		for(int i = 0; i < numWorkers; i++) {
+		for(int i = 0; i < headCount; i++) {
 			for(int j = 0; j < numTasks; j++) {
 				objective.setCoefficient(variables[i][j], timeWorks.get(j));
 			}
@@ -171,26 +175,23 @@ public class App {
 		
 		objective.setMinimization();
 		MPSolver.ResultStatus resultStatus = solver.solve();
-		List<DataOutput> output = new ArrayList<>();;
 		if(resultStatus == MPSolver.ResultStatus.OPTIMAL || resultStatus == MPSolver.ResultStatus.FEASIBLE ) {
 			
 			System.out.println("T/g Ca Lon: " + timeShiftBig);
 			System.out.println("T/g Ca Nho: " + timeShiftSmall);
 			System.out.println("Cost: " + objective.value());
-			for(int i = 0; i < numWorkers; i++) {
+			for(int i = 0; i < headCount; i++) {
 				int s = 0;
 				for(int j = 0; j < numTasks; j++) {
 					if(variables[i][j].solutionValue() > 0.5) {
 						s += timeWorks.get(j);
 						System.out.println("Worker NV" + (i+1) + " assigned to task " 
 										+ jobs.get(j) + ".  Time = " + timeWorks.get(j) +"p");
-						listOutput.add(new DataOutput(
-								date, shopId, 
-								shiftBig, "NV" + (i+1) ,	
-								false, false, 
-								shiftSmall, 
-								jobs.get(j), timeWorks.get(j),
-								null, null));
+						listOutput.add(
+								new DataOutput(date, shopId, shiftBig, "NV" + (i+1) ,	
+											false, false, shiftSmall, jobs.get(j), 
+											timeWorks.get(j),hourStart, minuteStart)
+								);
 					}
 				}
 				System.out.println("NV" + (i+1) + " => " + s);
